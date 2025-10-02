@@ -12,5 +12,4 @@
 ## 安装
 ```bash
 git clone https://github.com/yiayi27/BDAS.git
-cd BDAS/visionPred
 pip install -r requirements.txt
