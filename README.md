@@ -15,7 +15,7 @@
 * [5. 评估指标与可视化](#5-评估指标与可视化)
 * [6. 推理与部署](#6-推理与部署)
 * [项目结构](#项目结构)
-* [环境与安装](#环境与安装)
+
 
 ---
 
@@ -55,91 +55,55 @@ flowchart LR
 ## 1. 数据预处理
 
 > 针对白内障患者术后视力预测的任务，我们采用OCT,SLO,Text三种模态数据来做回归预测。其中SLO模态存在约2/3的模态缺失。
-![预处理流程图](images/01_preprocess.png)
+
+![预处理流程图](images/OCT预处理模型图.jpg)
 
 **要点**
 
-* 缺失值/异常值处理：…
-* 尺度统一与坐标对齐：…
-* 数值特征标准化 / 图像归一化：…
+* 为了进一步增强OCT图像的层次结构，便于提取OCT图像特征，我们使用优秀的pplite_seg进行OCT图像的层分割模型，分割结果如图：
+
+![预处理结果图](images/OCT图像预处理结果.jpg)
 
 ---
 
 ## 2. 数据集划分与增强
 
-> 放置训练/验证/测试划分示意图与增强策略总览图。
+> 训练/验证/测试划分
+* 我们使用8:1:1的比例划分数据集
 
-![数据划分](images/02_split.png)
+> 我们对OCT，SLO这两个图像模态进行粗细粒度相结合的特征提取
 
-![增强策略示例](images/02_augmentations.png)
+![增强策略示例](images/图像模态粗细粒度特征提取.jpg)
 
-**要点**
+> 我们对Text模态使用bert进行特征提取（其中text包含患者的结构化病理信息，对OCT,SLO图像的医学专业分析）
 
-* 划分比例（示例）：`train/val/test = 8/1/1`
-* 增强（示例）：随机翻转、旋转、颜色抖动、CutMix/MixUp（若使用）
-
----
 
 ## 3. 模型结构
 
-> 放置网络结构总览图或模块级别框图。
+> BDAS整体模型结构图
 
-![模型结构示意](images/03_model_arch.png)
+![模型结构示意](images/BDAS模型图.jpg)
 
-**配置示例**
+> 图像-文本对比学习模块
 
-* Backbone：ResNet18 / ResNet50 / ViT…
-* 颈部模块（可选）：FPN/Attention…
-* Head：回归/分类 Head，激活函数与输出维度说明
-* 损失：`L1/L2 + 正则项`（示例）
+![模型结构示意](images/对比学习模型图.jpg)
 
----
+> 自监督学习模块
+
+![模型结构示意](images/自监督学习细化.jpg)
+
 
 ## 4. 训练与超参
 
-> 放置损失曲线/学习率调度图，或训练日志关键截图。
-
-![训练曲线](images/04_training_curve.png)
-
-**超参示例**
-
-* batch_size：32
-* learning_rate：1e-3（CosineDecay/StepLR）
-* optimizer：AdamW (weight_decay=1e-4)
-* epochs：100
-* 早停策略：patience=10
-
----
+> 配置见requirements.txt文件
 
 ## 5. 评估指标与可视化
 
-> 放置指标表格截图、混淆矩阵/回归散点图、误差区间占比图。
-
-![评估可视化示例](images/05_metrics.png)
-
-**常用指标（回归）**
-
-* RMSE / MAE / MedAE
-* 误差区间占比：`≤ ±0.25d / ≤ ±0.5d / ≤ ±1.0d`
-* R²、Pearson/Spearman（若需要）
-
----
+> 使用MAE作为评价指标，更多使用方法欢迎继续改进哦
 
 ## 6. 推理与部署
 
-> 放置推理流程/接口调用图，或输入→输出样例图。
-
-![推理流程](images/06_inference.png)
-
-**推理示例**
-
-```python
-from utils.infer import Predictor
-pred = Predictor(model_path="weights/best.pth").run(input_sample)
-print(pred)
-```
-
----
+> 由于数据集并非开源，暂无适合的训练模型可以开源出来，作者会继续努力做的
 
 ## 项目结构
 
@@ -154,16 +118,8 @@ visionPred/
 ├─ loss/
 ├─ model/
 ├─ utils/
-└─ images/                 # ← 把本文提到的图片放这里
-   ├─ 01_preprocess.png
-   ├─ 02_split.png
-   ├─ 02_augmentations.png
-   ├─ 03_model_arch.png
-   ├─ 04_training_curve.png
-   ├─ 05_metrics.png
-   └─ 06_inference.png
-```
-
+└─ images/                 
+   
 ---
 
 ## 环境与安装
@@ -176,13 +132,6 @@ visionPred/
 pip install -r requirements.txt
 ```
 
-> 如果你使用了 CUDA，请在安装 `torch` 时按照官网指引选择与你 CUDA 版本匹配的发行版。
 
----
 
-### 使用说明（替换图片）
-
-1. 在仓库中创建 `images/` 文件夹（或使用网页端 **Add file → Upload files** 直接上传）。
-2. 把你的配图命名为上面列出的文件名；或按你的文件名修改本文中的图片路径。
-3. 提交后，GitHub 会自动在 README 中渲染这些图片与流程图（Mermaid）。
 
